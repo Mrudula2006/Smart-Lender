@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Lender — Loan Approval Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1220;
+    --ink-2:#131b2e;
+    --paper:#eef1ef;
+    --paper-dim:#aab3c0;
+    --line: rgba(238,241,239,0.14);
+    --brass:#c9a24a;
+    --approve:#5a9c78;
+    --review:#c1533f;
+    --display:'Fraunces', serif;
+    --body:'IBM Plex Sans', sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:48px 28px 80px;}
+  header{border-bottom:1px solid var(--line); padding-bottom:24px; margin-bottom:36px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:0.75rem; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--brass);
+  }
+  h1{font-family:var(--display); font-weight:600; font-size:2.1rem; margin:10px 0 6px;}
+  .sub{color:var(--paper-dim); font-size:0.95rem; max-width:56ch;}
+
+  form{background:var(--ink-2); border:1px solid var(--line); border-radius:10px; padding:32px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:20px 24px;}
+  @media (max-width:600px){.grid{grid-template-columns:1fr;}}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  label{font-size:0.8rem; color:var(--paper-dim); font-family:var(--mono);}
+  select, input{
+    background:var(--ink); color:var(--paper); border:1px solid var(--line);
+    border-radius:6px; padding:10px 12px; font-family:var(--body); font-size:0.95rem;
+  }
+  select:focus, input:focus{outline:2px solid var(--brass); outline-offset:1px;}
+
+  button{
+    margin-top:28px; width:100%; padding:14px; border:none; border-radius:6px;
+    background:var(--brass); color:var(--ink); font-weight:600; font-size:1rem;
+    font-family:var(--body); cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08);}
+
+  .result{
+    margin-top:28px; padding:22px 24px; border-radius:10px; border:1px solid var(--line);
+    display:flex; align-items:center; gap:16px;
+  }
+  .result.approved{background:rgba(90,156,120,0.12); border-color:var(--approve);}
+  .result.review{background:rgba(193,83,63,0.12); border-color:var(--review);}
+  .badge{
+    font-family:var(--mono); font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase;
+    padding:4px 10px; border-radius:999px;
+  }
+  .approved .badge{background:var(--approve); color:var(--ink);}
+  .review .badge{background:var(--review); color:var(--ink);}
+  .result h2{font-family:var(--display); font-size:1.3rem; margin:0 0 4px;}
+  .result p{margin:0; color:var(--paper-dim); font-size:0.9rem;}
+
+  .error{
+    margin-top:20px; padding:14px 18px; border-radius:8px;
+    background:rgba(193,83,63,0.15); border:1px solid var(--review); font-size:0.9rem;
+  }
+  footer{margin-top:36px; color:var(--paper-dim); font-size:0.8rem; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Smart Lender</div>
+    <h1>Loan Approval Predictor</h1>
+    <p class="sub">Enter applicant details below for an instant creditworthiness prediction, powered by a {{ model_name }} model.</p>
+  </header>
+
+  <form method="POST" action="/predict">
+    <div class="grid">
+      <div class="field">
+        <label for="Gender">Gender</label>
+        <select name="Gender" id="Gender">
+          {% for opt in fields['Gender'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="Married">Married</label>
+        <select name="Married" id="Married">
+          {% for opt in fields['Married'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="Dependents">Dependents</label>
+        <select name="Dependents" id="Dependents">
+          {% for opt in fields['Dependents'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="Education">Education</label>
+        <select name="Education" id="Education">
+          {% for opt in fields['Education'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="Self_Employed">Self-employed</label>
+        <select name="Self_Employed" id="Self_Employed">
+          {% for opt in fields['Self_Employed'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="Property_Area">Property area</label>
+        <select name="Property_Area" id="Property_Area">
+          {% for opt in fields['Property_Area'] %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ApplicantIncome">Applicant income (monthly)</label>
+        <input type="number" step="1" min="0" name="ApplicantIncome" id="ApplicantIncome" placeholder="e.g. 5400" required>
+      </div>
+      <div class="field">
+        <label for="CoapplicantIncome">Co-applicant income (monthly)</label>
+        <input type="number" step="1" min="0" name="CoapplicantIncome" id="CoapplicantIncome" placeholder="e.g. 0" required>
+      </div>
+      <div class="field">
+        <label for="LoanAmount">Loan amount (in thousands)</label>
+        <input type="number" step="1" min="0" name="LoanAmount" id="LoanAmount" placeholder="e.g. 128" required>
+      </div>
+      <div class="field">
+        <label for="Loan_Amount_Term">Loan term (days)</label>
+        <input type="number" step="1" min="0" name="Loan_Amount_Term" id="Loan_Amount_Term" placeholder="e.g. 360" required>
+      </div>
+      <div class="field full">
+        <label for="Credit_History">Credit history meets guidelines?</label>
+        <select name="Credit_History" id="Credit_History">
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit">Predict approval</button>
+  </form>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  {% if result %}
+    <div class="result {{ 'approved' if result.approved else 'review' }}">
+      <div>
+        <span class="badge">{{ 'Approved' if result.approved else 'Needs review' }}</span>
+        <h2>{{ 'Loan likely to be approved' if result.approved else 'Flagged as high risk' }}</h2>
+        <p>
+          {% if result.confidence %}Model confidence: {{ result.confidence }}%.{% endif %}
+          {{ 'This applicant profile matches patterns typical of repaid loans.' if result.approved else 'Recommend manual review or additional documentation before proceeding.' }}
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+  <footer>Model: {{ model_name }} · trained on applicant demographic &amp; financial data</footer>
+</div>
+</body>
+</html>
